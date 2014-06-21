@@ -44,10 +44,16 @@
 
 			return selection.getRangeAt(0).endContainer;
 		};
-		slack.moveMsgCursor2End = function()
+		slack.moveMsgCursorToEnd = function()
 		{
-			slack.$msg[0].scrollTop = slack.$msg[0].scrollHeight; // Scroll to bottom.
+			slack.$msg[0].scrollTop = slack.$msg[0].scrollHeight;
 			slack.$msg[0].selectionStart = slack.$msg[0].selectionEnd = slack.$msg.val().length;
+		};
+		slack.sendMsgInputEventForAutosizing = function()
+		{
+			var event = document.createEvent('HTMLEvents');
+			event.initEvent('input', true, true);
+			slack.$msg[0].dispatchEvent(event);
 		};
 		slack.winSelectionParentMentionName = function()
 		{
@@ -61,7 +67,7 @@
 
 			return '@[unknown]'; // Default behavior.
 		};
-		$('body').on___('keydown', function(event)
+		$('body').on('keydown', function(event)
 		{
 			if(event.shiftKey || event.ctrlKey || event.altKey || event.metaKey || event.which !== 82)
 				return; // Not the `R` key by itself; nothing to do in this case.
@@ -72,7 +78,7 @@
 			event.stopImmediatePropagation(), // Stop other event handlers.
 				event.preventDefault(); // Prevent default behavior.
 		});
-		$('body').on___('keyup', function(event)
+		$('body').on('keyup', function(event)
 		{
 			if(event.shiftKey || event.ctrlKey || event.altKey || event.metaKey || event.which !== 82)
 				return; // Not the `R` key by itself; nothing to do in this case.
@@ -90,7 +96,8 @@
 			newVal += winSelection.replace(/^/gm, '> ');
 			newVal = $.trim(newVal) + '\n---- ';
 
-			slack.$msg.val(newVal), slack.$msg.focus(), slack.moveMsgCursor2End();
+			slack.$msg.val(newVal), slack.$msg.focus(), slack.moveMsgCursorToEnd(),
+				slack.sendMsgInputEventForAutosizing();
 		});
 	};
 	slack.initializer = function()
@@ -100,15 +107,4 @@
 				slack.initialized = true; // All set now :-)
 	};
 	slack.initializerInterval = setInterval(slack.initializer, 1000);
-
-	$.fn.on___ = function(name, fn)
-	{
-		this.on(name, fn), this.each( // This handler first!
-			function() // Move this handler to the top of the stack.
-			{
-				var handlers = $._data(this, 'events')[name.split('.')[0]];
-				var handler = handlers.pop();
-				handlers.splice(0, 0, handler);
-			});
-	};
 })(jQuery);
