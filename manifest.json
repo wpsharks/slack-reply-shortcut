@@ -1,7 +1,7 @@
 {
 	"manifest_version": 2,
 
-	"version"                 : "14.6.20",
+	"version"                 : "14.6.23",
 	"name"                    : "Slack Reply Shortcut",
 	"description"             : "Use the `R` shortcut key w/ selected text to reply easily.",
 	"icons"                   : {
