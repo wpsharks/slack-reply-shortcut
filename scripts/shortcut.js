@@ -57,13 +57,31 @@
 		};
 		slack.winSelectionParentMentionName = function()
 		{
-			var teamMember = $(slack.getWinSelectionParent()).closest('div.message')
-				.find('> a[data-member-id][target^="/team/"]').first().attr('target');
-			if(teamMember) return '@' + teamMember.replace(/^\/team\//ig, '');
+			var $winSelectionParent = $(slack.getWinSelectionParent());
+			var $messageShowingUser, _teamService, teamMember, serviceName;
 
-			var serviceName = $(slack.getWinSelectionParent()).closest('div.message')
-				.find('> span.message_sender > a[target^="/services/"]').html();
-			if(serviceName) return slack.plainText(serviceName);
+			if(($messageShowingUser = $winSelectionParent.closest('.message.show_user')).length
+			   && (_teamService = $messageShowingUser.find('> a[data-member-id][target^="/team/"]').first().attr('target')))
+				teamMember = _teamService.replace(/^\/team\//ig, '');
+
+			else if(($messageShowingUser = $winSelectionParent.closest('.message.show_user')).length
+			        && ((_teamService = $messageShowingUser.find('> span.message_sender > a[target^="/services/"]').html())
+			            || (_teamService = $messageShowingUser.find('> span.message_sender').html())))
+				serviceName = slack.plainText(_teamService);
+
+			else if(($messageShowingUser = $winSelectionParent.closest('.message').prevAll('.message.show_user').first()).length
+			        && (_teamService = $messageShowingUser.find('> a[data-member-id][target^="/team/"]').first().attr('target')))
+				teamMember = _teamService.replace(/^\/team\//ig, '');
+
+			else if(($messageShowingUser = $winSelectionParent.closest('.message').prevAll('.message.show_user').first()).length
+			        && ((_teamService = $messageShowingUser.find('> span.message_sender > a[target^="/services/"]').html())
+			            || (_teamService = $messageShowingUser.find('> span.message_sender').html())))
+				serviceName = slack.plainText(_teamService);
+
+			if(teamMember) return '@' + teamMember;
+
+			if(serviceName) // No `@` callout in this case.
+				return serviceName; // e.g. `GitHub`.
 
 			return '@[unknown]'; // Default behavior.
 		};
