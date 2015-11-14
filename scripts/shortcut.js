@@ -81,7 +81,7 @@
         } else if (serviceName) {
           // Map known service→member translations.
           // Service names = e.g., GitHub, iDoneThis, etc.
-          switch (serviceName.toLowerCase()) {
+          switch (serviceName.toLowerCase().split(/\svia\s/)[0]) {
             //
           case 'jaswsinc':
           case 'jason caldwell':
@@ -117,6 +117,7 @@
 
           case 'patdumond':
           case 'pat dumond':
+          case 'patricia dumond':
             return '@patdumond';
 
           case 'reedyseth':
