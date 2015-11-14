@@ -1,128 +1,181 @@
-(function($)
-{
-	'use strict'; // Strict Standards.
+(function ($) {
+  'use strict'; // Strict Standards.
 
-	var slack = {initialized: false}; // Object.
+  var slack = {}; // Initialize object container.
 
-	slack.init = function() // Initializer.
-	{
-		if(slack.initialized) return; // Already done.
+  slack.init = function () // Initializer.
+    {
+      slack.escHtml = slack.escAttr = function (string) {
+        string = String(string);
 
-		slack.escHtml = slack.escAttr = function(string)
-		{
-			if(/[&\<\>"']/.test(string = String(string)))
-				string = string.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'),
-					string = string.replace(/"/g, '&quot;').replace(/'/g, '&#039;');
-			return string;
-		};
-		slack.plainText = function(string)
-		{
-			var lineBreak = '___lineBreak___', // Preserve line breaks.
-				lineBreakedHtml = String(string).replace(/\<br(?:\s*\/)?\>/gi, lineBreak)
-					.replace(/<p(?:\s+[^>]*)?>(.*?)<\/p>/gi, lineBreak + '$1' + lineBreak);
-			return $.trim($('<div>').html(lineBreakedHtml).text().replace(new RegExp(lineBreak, 'g'), '\n'));
-		};
-		slack.getWinSelection = function()
-		{
-			var selection = getSelection();
+        if (/[&<>"']/.test(string)) {
+          string = string.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          string = string.replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+        }
+        return string;
+      };
 
-			if(!selection.rangeCount)
-				return; // No selection.
+      slack.plainText = function (string) {
+        string = String(string);
 
-			var $container = $('<div>'); // Holds the selection.
-			for(var i = 0, length = selection.rangeCount; i < length; i++)
-				$container.append(selection.getRangeAt(i).cloneContents());
+        var lineBreak = '___lineBreak___',
+          lineBreakedHtml = string;
 
-			return slack.plainText($container.html());
-		};
-		slack.getWinSelectionParent = function()
-		{
-			var selection = getSelection();
+        lineBreakedHtml = string.replace(/[<]br(?:\s*\/)?[>]/gi, lineBreak);
+        lineBreakedHtml = lineBreakedHtml.replace(/<p(?:\s+[^>]*)?>(.*?)<\/p>/gi, lineBreak + '$1' + lineBreak);
 
-			if(!selection.rangeCount)
-				return; // No selection.
+        return $.trim($('<div>').html(lineBreakedHtml).text().replace(new RegExp(lineBreak, 'g'), '\n'));
+      };
 
-			return selection.getRangeAt(0).endContainer;
-		};
-		slack.moveMsgCursorToEnd = function()
-		{
-			slack.$msg[0].scrollTop = slack.$msg[0].scrollHeight;
-			slack.$msg[0].selectionStart = slack.$msg[0].selectionEnd = slack.$msg.val().length;
-		};
-		slack.sendMsgInputEventForAutosizing = function()
-		{
-			var event = document.createEvent('HTMLEvents');
-			event.initEvent('input', true, true);
-			slack.$msg[0].dispatchEvent(event);
-		};
-		slack.winSelectionParentMentionName = function()
-		{
-			var $winSelectionParent = $(slack.getWinSelectionParent());
-			var $messageShowingUser, _teamService, teamMember, serviceName;
+      slack.getWinSelection = function () {
+        var selection = getSelection();
 
-			if(($messageShowingUser = $winSelectionParent.closest('.message.show_user')).length
-			   && (_teamService = $messageShowingUser.find('> a[data-member-id][target^="/team/"]').first().attr('target')))
-				teamMember = _teamService.replace(/^\/team\//ig, '');
+        if (!selection.rangeCount) {
+          return; // No selection.
+        }
+        var $container = $('<div>'); // Holds the selection.
 
-			else if(($messageShowingUser = $winSelectionParent.closest('.message.show_user')).length
-			        && ((_teamService = $messageShowingUser.find('> span.message_sender > a[target^="/services/"]').html())
-			            || (_teamService = $messageShowingUser.find('> span.message_sender').html())))
-				serviceName = slack.plainText(_teamService);
+        for (var i = 0, length = selection.rangeCount; i < length; i++) {
+          $container.append(selection.getRangeAt(i).cloneContents());
+        }
+        return slack.plainText($container.html());
+      };
 
-			else if(($messageShowingUser = $winSelectionParent.closest('.message').prevAll('.message.show_user').first()).length
-			        && (_teamService = $messageShowingUser.find('> a[data-member-id][target^="/team/"]').first().attr('target')))
-				teamMember = _teamService.replace(/^\/team\//ig, '');
+      slack.getWinSelectionParent = function () {
+        var selection = getSelection();
 
-			else if(($messageShowingUser = $winSelectionParent.closest('.message').prevAll('.message.show_user').first()).length
-			        && ((_teamService = $messageShowingUser.find('> span.message_sender > a[target^="/services/"]').html())
-			            || (_teamService = $messageShowingUser.find('> span.message_sender').html())))
-				serviceName = slack.plainText(_teamService);
+        if (!selection.rangeCount) {
+          return; // No selection.
+        }
+        return selection.getRangeAt(0).endContainer;
+      };
 
-			if(teamMember) return '@' + teamMember;
+      slack.moveMsgCursorToEnd = function () {
+        slack.$msg[0].scrollTop = slack.$msg[0].scrollHeight;
+        slack.$msg[0].selectionStart = slack.$msg[0].selectionEnd = slack.$msg.val().length;
+      };
 
-			if(serviceName) // No `@` callout in this case.
-				return serviceName; // e.g. `GitHub`.
+      slack.sendMsgInputEventForAutosizing = function () {
+        var event = document.createEvent('HTMLEvents');
+        event.initEvent('input', true, true);
+        slack.$msg[0].dispatchEvent(event);
+      };
 
-			return '@[unknown]'; // Default behavior.
-		};
-		$('body').on('keydown', function(event)
-		{
-			if(event.shiftKey || event.ctrlKey || event.altKey || event.metaKey || event.which !== 82)
-				return; // Not the `R` key by itself; nothing to do in this case.
+      slack.winSelectionParentMentionName = function () {
+        var $winSelectionParent = $(slack.getWinSelectionParent());
+        var $messageFirst, _teamOrService, teamMember, serviceName;
 
-			var winSelection = slack.getWinSelection();
-			if(!winSelection) return; // No selection.
+        $messageFirst = $winSelectionParent.closest('.message.first');
+        if (!$messageFirst.length) { // In case of message that is NOT the `.first` itself.
+          $messageFirst = $winSelectionParent.closest('.message').prevAll('.message.first').first();
+        }
+        if ($messageFirst.length && (_teamOrService = $messageFirst.find('[data-member-id][target^="/team/"]').attr('target'))) {
+          teamMember = _teamOrService.replace(/^\/team\//ig, '');
+        } else if ($messageFirst.length && (_teamOrService = $messageFirst.find('.message_sender [target^="/services/"]').html())) {
+          serviceName = slack.plainText(_teamOrService);
+        } else if ($messageFirst.length && (_teamOrService = $messageFirst.find('.message_sender').html())) {
+          serviceName = slack.plainText(_teamOrService);
+        }
+        if (teamMember) {
+          return '@' + teamMember;
+        } else if (serviceName) {
+          // Map known service→member translations.
+          // Service names = e.g., GitHub, iDoneThis, etc.
+          switch (serviceName.toLowerCase()) {
+            //
+          case 'jaswsinc':
+          case 'jason caldwell':
+            return '@jaswsinc';
 
-			event.stopImmediatePropagation(), // Stop other event handlers.
-				event.preventDefault(); // Prevent default behavior.
-		});
-		$('body').on('keyup', function(event)
-		{
-			if(event.shiftKey || event.ctrlKey || event.altKey || event.metaKey || event.which !== 82)
-				return; // Not the `R` key by itself; nothing to do in this case.
+          case 'raamdev':
+          case 'raam dev':
+            return '@raamdev';
 
-			var winSelection = slack.getWinSelection();
-			if(!winSelection) return; // No selection.
+          case 'brucewsinc':
+          case 'bruce caldwell':
+            return '@brucewsinc';
 
-			event.stopImmediatePropagation(), // Stop other event handlers.
-				event.preventDefault(); // Prevent default behavior.
+          case 'elizwsinc':
+          case 'elizabeth caldwell':
+            return '@elizwsinc';
 
-			var val = $.trim(slack.$msg.val()),
-				newVal = val; // Start w/ current value.
+          case 'clavaque':
+          case 'cristian lavaque':
+          case 'cristián lávaque':
+            return '@clavaque';
 
-			newVal += '\n\n' + $.trim(slack.winSelectionParentMentionName()) + ' writes...\n';
-			newVal += winSelection.replace(/^/gm, '> ');
-			newVal = $.trim(newVal) + '\n---- ';
+          case 'kristineds':
+          case 'kristine ds':
+          case 'kristine delos-santos':
+          case 'kristine delos santos':
+            return '@kristineds';
 
-			slack.$msg.val(newVal), slack.$msg.focus(), slack.moveMsgCursorToEnd(),
-				slack.sendMsgInputEventForAutosizing();
-		});
-	};
-	slack.initializer = function()
-	{
-		if((slack.$msg = $('textarea#message-input')).length)
-			clearInterval(slack.initializerInterval), slack.init(),
-				slack.initialized = true; // All set now :-)
-	};
-	slack.initializerInterval = setInterval(slack.initializer, 1000);
+          case 'renzms':
+          case 'renz ms':
+          case 'renz sevilla':
+            return '@renzms';
+
+          case 'patdumond':
+          case 'pat dumond':
+            return '@patdumond';
+
+          case 'reedyseth':
+          case 'israel barragan':
+            return '@reedyseth';
+
+          case 'kts915':
+          case 'tim kaye':
+            return '@kts915';
+          }
+          return serviceName;
+        }
+        return 'Someone'; // Default behavior.
+      };
+
+      $('body').on('keydown', function (event) {
+        if (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey || event.which !== 82) {
+          return; // Not the `R` key by itself; nothing to do in this case.
+        }
+        var winSelection; // Initialize.
+
+        if (!(winSelection = slack.getWinSelection())) {
+          return; // No selection.
+        }
+        event.stopImmediatePropagation();
+        event.preventDefault();
+      });
+
+      $('body').on('keyup', function (event) {
+        if (event.shiftKey || event.ctrlKey || event.altKey || event.metaKey || event.which !== 82) {
+          return; // Not the `R` key by itself; nothing to do in this case.
+        }
+        var winSelection; // Initialize.
+
+        if (!(winSelection = slack.getWinSelection())) {
+          return; // No selection.
+        }
+        event.stopImmediatePropagation();
+        event.preventDefault();
+
+        var val = $.trim(slack.$msg.val()),
+          newVal = val; // Current value.
+
+        newVal += '\n\n' + $.trim(slack.winSelectionParentMentionName()) + ' writes...\n';
+        newVal += winSelection.replace(/^/gm, '> ');
+        newVal = $.trim(newVal) + '\n---- ';
+
+        slack.$msg.val(newVal).focus();
+        slack.moveMsgCursorToEnd();
+        slack.sendMsgInputEventForAutosizing();
+      });
+    };
+
+  slack.initializer = function () {
+    if ((slack.$msg = $('#message-input')).length) {
+      clearInterval(slack.initializerInterval);
+    }
+    slack.init(); // Initialize.
+  };
+
+  slack.initializerInterval = setInterval(slack.initializer, 1000);
 })(jQuery);
