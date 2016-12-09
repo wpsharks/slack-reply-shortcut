@@ -18,6 +18,10 @@ Use the `R` shortcut key w/ selected text to reply easily in the web interface.
 - Choose the `slack-reply-shortcut` folder and you're set.
 - Now just reload the Slack web interface. Select some text and press the `R` key.
 
+## Tip: Use a Custom Emoji
+
+Each reply will begin with `:re:`, making it possible for your team to add an emoji that will represent a reply arrow.
+
 #### Credits / Additional Acknowledgments
 
 - Developed by [WebSharks, Inc.](http://www.websharks-inc.com/)

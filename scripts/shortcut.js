@@ -91,18 +91,9 @@
           case 'raam dev':
             return '@raamdev';
 
-          case 'brucewsinc':
-          case 'bruce caldwell':
-            return '@brucewsinc';
-
           case 'elizwsinc':
           case 'elizabeth caldwell':
             return '@elizwsinc';
-
-          case 'clavaque':
-          case 'cristian lavaque':
-          case 'cristián lávaque':
-            return '@clavaque';
 
           case 'kristineds':
           case 'kristine ds':
@@ -114,19 +105,6 @@
           case 'renz ms':
           case 'renz sevilla':
             return '@renzms';
-
-          case 'patdumond':
-          case 'pat dumond':
-          case 'patricia dumond':
-            return '@patdumond';
-
-          case 'reedyseth':
-          case 'israel barragan':
-            return '@reedyseth';
-
-          case 'kts915':
-          case 'tim kaye':
-            return '@kts915';
           }
           return serviceName;
         }
@@ -163,7 +141,7 @@
 
         newVal += '\n\n' + $.trim(slack.winSelectionParentMentionName()) + ' writes...\n';
         newVal += winSelection.replace(/^/gm, '> ');
-        newVal = $.trim(newVal) + '\n---- ';
+        newVal = $.trim(newVal) + '\n:re: ';
 
         slack.$msg.val(newVal).focus();
         slack.moveMsgCursorToEnd();
