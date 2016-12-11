@@ -58,3 +58,5 @@ Select some text in a message and press the <kbd>R</kbd> key.
 ## Caveat (Not Persistent)
 
 When you exit Slack, the changes are lost. You'll need to repeat, starting from [this step](#start-slack-from-command-line).
+
+_**Tip:** The next time you enter the `$.getScript(...` command, you can just press the ↑ arrow in the console. The console remembers your previous command entries, so that's a bit of a time-saver._
