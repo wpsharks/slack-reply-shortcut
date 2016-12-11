@@ -57,4 +57,4 @@ Select some text in a message and press the <kbd>R</kbd> key.
 
 ## Caveat (Not Persistent)
 
-When you exit Slack, the changes are lost. You'll need to repeat, starting from [this step](https://github.com/websharks/slack-reply-shortcut/blob/dev/MAC-NATIVE.md#start-slack-from-command-line).
+When you exit Slack, the changes are lost. You'll need to repeat, starting from [this step](#start-slack-from-command-line).
