@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
 
-  "version": "15.6.20",
+  "version": "15.6.21",
   "name": "Slack Reply Shortcut",
   "description": "Use the `R` shortcut key w/ selected text to reply easily.",
   "icons": {
@@ -17,6 +17,7 @@
     ],
     "js": [
       "scripts/jquery.min.js",
+      "scripts/lodash.min.js",
       "scripts/shortcut.js"
     ]
   }],
